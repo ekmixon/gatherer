@@ -55,7 +55,7 @@ def get_all_descendants(database, owner):
     """
     current_request = database.requests.find_one({"_id": owner})
     if not current_request:
-        raise ValueError(owner + " has no request document")
+        raise ValueError(f"{owner} has no request document")
 
     descendants = []
     if current_request.get("children"):
@@ -86,41 +86,42 @@ def main():
         db = db_from_config(db_creds_file)
     except OSError:
         logging.critical(
-            "Database configuration file {} does not exist".format(db_creds_file),
+            f"Database configuration file {db_creds_file} does not exist",
             exc_info=True,
         )
+
         return 1
     except yaml.YAMLError:
         logging.critical(
-            "Database configuration file {} does not contain valid YAML".format(
-                db_creds_file
-            ),
+            f"Database configuration file {db_creds_file} does not contain valid YAML",
             exc_info=True,
         )
+
         return 1
     except KeyError:
         logging.critical(
-            "Database configuration file {} does not contain the expected keys".format(
-                db_creds_file
-            ),
+            f"Database configuration file {db_creds_file} does not contain the expected keys",
             exc_info=True,
         )
+
         return 1
     except pymongo.errors.ConnectionError:
         logging.critical(
-            "Unable to connect to the database server in {}".format(db_creds_file),
+            f"Unable to connect to the database server in {db_creds_file}",
             exc_info=True,
         )
+
         return 1
     except pymongo.errors.InvalidName:
         logging.critical(
-            "The database in {} does not exist".format(db_creds_file), exc_info=True
+            f"The database in {db_creds_file} does not exist", exc_info=True
         )
+
         return 1
 
     # Get all Federal organizations
     fed_orgs = get_all_descendants(db, "FEDERAL")
-    logging.debug("Federal orgs are {}".format(fed_orgs))
+    logging.debug(f"Federal orgs are {fed_orgs}")
 
     # Get all Federal hosts with open ports that indicate a possible web or
     # email server (latest scan only)...
@@ -149,8 +150,8 @@ def main():
 
     with open(args["--output-file"], "w") as file:
         for host in fed_hosts:
-            file.write("{},{}\n".format(host["hostname"], host["owner"]))
-            logging.debug("Federal host {}".format(host))
+            file.write(f'{host["hostname"]},{host["owner"]}\n')
+            logging.debug(f"Federal host {host}")
 
 
 if __name__ == "__main__":
